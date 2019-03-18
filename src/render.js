@@ -2,16 +2,8 @@ import {convertRgbToString} from "./utils";
 import DataManager from "./DataManager";
 import {Matrix} from "./Matrix";
 import AnimationController from "./AnimationController";
-import {compileProgramm, setupBuffers} from "./GlUtils";
+import {compileProgramm} from "./GlUtils";
 
-export function relativePositionToAbsolute(posX, posY, width, height) {
-    return {
-        posX: (posX + 1) * width  / 2,
-        posY: (-1)*(posY - 1) * height / 2
-    }
-}
-
-// Vertex shader source code
 const vertCode =
     'attribute vec4 a_color;' +
     'attribute vec3 coordinates;' +
@@ -94,28 +86,13 @@ export function compileCircleShaderProgram (gl) {
 
 export function drawGraphMatrixes(gl, shaderProgram, buffersData, matrix) {
     const { bufferSize, vertexBuffer, colorBuffer } = buffersData
-// Use the combined shader program object
     gl.useProgram(shaderProgram);
-    /*======= Associating shaders to buffer objects ======*/
-
-// Bind vertex buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-
-// Get the attribute location
     var coord = gl.getAttribLocation(shaderProgram, "coordinates");
     var colorLocation = gl.getAttribLocation(shaderProgram, "a_color");
-
-// Point an attribute to the currently bound VBO
     gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
-
-
-    // Turn on the color attribute
     gl.enableVertexAttribArray(colorLocation);
-
-    // Bind the color buffer.
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-
-    // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
     var size = 3;                 // 3 components per iteration
     var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
     var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
@@ -123,24 +100,11 @@ export function drawGraphMatrixes(gl, shaderProgram, buffersData, matrix) {
     var offset = 0;               // start at the beginning of the buffer
     gl.vertexAttribPointer(
         colorLocation, size, type, normalize, stride, offset);
-// Enable the attribute
     gl.enableVertexAttribArray(coord);
     const Umatrix = gl.getUniformLocation(shaderProgram, "u_matrix");
-    /*============ Drawing the triangle =============*/
-
-// Clear the canvas
-    //gl.clearColor(1, 1, 1, 1);
-
-// Enable the depth test
      gl.enable(gl.DEPTH_TEST);
-
-// Clear the color and depth buffer
-    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.uniformMatrix3fv(Umatrix, false, matrix);
-// Set the view port
     gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
-
-// Draw the triangle
     gl.drawArrays(gl.LINE_STRIP, 0, bufferSize);
 }
 
@@ -166,32 +130,14 @@ export function drawCircles(gl, shaderProgram, buffersData, matrix, color) {
 
 export function drawLines(gl, shaderProgram, buffersData, matrix) {
     const { bufferSize, vertexBuffer, colorBuffer } = buffersData
-
     gl.useProgram(shaderProgram);
-
-    /*======= Associating shaders to buffer objects ======*/
-
-// Bind vertex buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-
-// Get the attribute location
     var coord = gl.getAttribLocation(shaderProgram, "coordinates");
     var colorLocation = gl.getAttribLocation(shaderProgram, "a_color");
-
-// Point an attribute to the currently bound VBO
     gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
-
-// Enable the attribute
     gl.enableVertexAttribArray(coord);
-    /*============ Drawing the triangle =============*/
-
-    // Turn on the color attribute
     gl.enableVertexAttribArray(colorLocation);
-
-    // Bind the color buffer.
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-
-    // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
     var size = 3;                 // 3 components per iteration
     var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
     var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
@@ -200,31 +146,17 @@ export function drawLines(gl, shaderProgram, buffersData, matrix) {
     gl.vertexAttribPointer(
         colorLocation, size, type, normalize, stride, offset);
     const Umatrix = gl.getUniformLocation(shaderProgram, "u_matrix");
-    /*============ Drawing the triangle =============*/
-
-// Clear the canvas
-    //gl.clearColor(1, 1, 1, 1);
-
-// Enable the depth test
-    // gl.enable(gl.DEPTH_TEST);
-
-// Clear the color and depth buffer
-    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.uniformMatrix3fv(Umatrix, false, matrix);
-// Clear the canvas
-
-// Draw the triangle
     gl.drawArrays(gl.LINES, 0, bufferSize);
 }
 
 
 export function drawLetter (gl, shaderProgram, buffersData, matrix) {
-    const { bufferSize, vertexBuffer, colorBuffer, indexBuffer, textCoordsBuffer, texture } = buffersData
+    const { bufferSize, vertexBuffer, colorBuffer, textCoordsBuffer, texture } = buffersData
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.depthMask(false);
     gl.useProgram(shaderProgram);
-    // Get the attribute location
     var coord = gl.getAttribLocation(shaderProgram, "coordinates");
     var colorLocation = gl.getUniformLocation(shaderProgram, "u_color");
     var textCoord = gl.getAttribLocation(shaderProgram,  "a_texcoord");
@@ -241,32 +173,12 @@ export function drawLetter (gl, shaderProgram, buffersData, matrix) {
 
 
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    // var size = 3;                 // 3 components per iteration
-    // var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
-    // var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
-    // var stride = 0;               // 0 = move forward size * sizeof(type) each iteration to get the next position
-    // var offset = 0;              // start at the beginning of the buffer
-    // gl.vertexAttribPointer(
-    //     colorLocation, size, type, normalize, stride, offset)
-    // Turn on the color attribute
-
     gl.uniform4fv(colorLocation, [0.4, 0.4, 0.4, 1])
     gl.uniformMatrix3fv(Umatrix, false, matrix);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(textureLocation, 0)
     gl.drawArrays(gl.TRIANGLE_FAN, 0, bufferSize);
-}
-
-
-export function drawLabels (gl, shaderProgram, buffersData, matrix) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.font = "14px serif";
-    for (let ii = 1; ii < vertices.length; ii += 6) {
-        var txtPos = relativePositionToAbsolute(posX, vertices[ii] + 0.03, ctx.canvas.clientWidth, ctx.canvas.clientHeight)
-        ctx.fillText(labels[ (ii - 1) / 6 ], txtPos.posX, txtPos.posY);
-    }
 }
 
 
@@ -301,11 +213,9 @@ export function buildMatrix (dimensions, params) {
 export function clearGl (gl) {
     gl.clearColor(1, 1, 1, 1);
 
-// Enable the depth test
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);
 
-// Clear the color and depth buffer
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0,0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 }
@@ -325,7 +235,7 @@ export function drawScene (clock) {
     const maxY = AnimationController.Animate('MaxY', clock)
     AnimationController.currentTime = clock
     const dimensions = buildDimensions(charData.minX, charData.maxX, 0, maxY)
-    const { bufferData: linesBufferData, labels } = charData.lines
+    const { bufferData: linesBufferData } = charData.lines
 
     clearGl(gl)
     clearGl(gl2)
@@ -334,7 +244,6 @@ export function drawScene (clock) {
     for (let bufferInfo of charData.letterInfo) {
         drawLetter(gl, textShaderProgram, bufferInfo, buildMatrix(dimensions, defaultParams))
     }
-    // drawLabels(ctx, -1, vertices, labels)
 
     for (let chartIdx in charData.chartVerticesGl) {
         drawGraphMatrixes(gl, glChartShaderProgram, charData.chartVerticesGl[chartIdx], buildMatrix(dimensions, {

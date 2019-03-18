@@ -10,6 +10,7 @@ import DataManager from "./DataManager";
 import {renderControllButtons} from "./UiControls";
 import AnimationController from "./AnimationController";
 import SliderController from "./SliderController";
+import {Toooltipcontroller} from "./TooltipController";
 
 function init() {
     var canvas = document.getElementById('glcanvas');
@@ -24,8 +25,16 @@ function init() {
     dataManager.setShaderProgram('gl2LineShaderProgram', compileLineShaderProgram(gl))
     dataManager.setShaderProgram('glTextShaderProgram', compileTextShaderProgram(gl))
     dataManager.setShaderProgram('glCircleShaderProgram', compileCircleShaderProgram(gl))
+    const tooltipController = new Toooltipcontroller()
+    canvas.addEventListener('mousemove', (e) => tooltipController.displayTooltip(e))
+    canvas.addEventListener('mouseleave', () => tooltipController.hideTooltip())
     renderControllButtons(dataManager)
     requestAnimationFrame(drawScene.bind(this));
+    fetch('/data').then(function(response) {
+        return response.json();
+    }).then(function(myBlob) {
+        console.log(myBlob)
+    });
 }
 
 init()
