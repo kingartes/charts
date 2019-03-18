@@ -345,9 +345,9 @@ export function drawScene (clock) {
         }))
         drawGraphMatrixes(gl2, gl2ChartShaderProgram, charData.chartVerticesGl2[chartIdx], buildMatrix(dimensions, defaultParams))
     }
-    // for (let bufferInfo of charData.circlesBuffers) {
-    //     drawCircles(gl, circleShaderProgram, bufferInfo.buffer, buildMatrix(dimensions, defaultParams), bufferInfo.color)
-    // }
+    for (let bufferInfo of charData.circlesBuffers) {
+        drawCircles(gl, circleShaderProgram, bufferInfo.buffer, buildMatrix(dimensions, defaultParams), bufferInfo.color)
+    }
     requestAnimationFrame(drawScene)
 }
 
