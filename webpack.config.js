@@ -11,7 +11,9 @@ module.exports = {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
         port: process.env.PORT,
-        host: 'floating-retreat-35238.herokuapp.com'
+        headers: {
+            "Access-Control-Allow-Origin": "*"
+        }
     },
     devtool: 'eval-source-map'
 };
