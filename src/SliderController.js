@@ -10,6 +10,9 @@ class SliderController {
         this.slider.addEventListener("mousedown", e => this.mouseDown(e) )
         document.addEventListener("mouseup", e => this.mouseUp(e) )
         this.sliderContainer.addEventListener("mousemove", e => this.mouseMove(e) )
+        this.slider.addEventListener("touchstart", e => this.mouseDown(e) )
+        document.addEventListener("touchend", e => this.mouseUp(e) )
+        this.sliderContainer.addEventListener("touchmove", e => this.mouseMove(e) )
         this.originalWidth = parseInt(this.sliderContainer.style.width)
     }
 
