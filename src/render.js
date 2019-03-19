@@ -1,4 +1,4 @@
-import {convertRgbToString} from "./utils";
+import {convertRgbToArray} from "./utils";
 import DataManager from "./DataManager";
 import {Matrix} from "./Matrix";
 import AnimationController from "./AnimationController";
@@ -254,9 +254,28 @@ export function drawScene (clock) {
         }))
         drawGraphMatrixes(gl2, gl2ChartShaderProgram, charData.chartVerticesGl2[chartIdx], buildMatrix(dimensions, defaultParams))
     }
-    for (let bufferInfo of charData.circlesBuffers) {
-        drawCircles(gl, circleShaderProgram, bufferInfo.buffer, buildMatrix(dimensions, defaultParams), bufferInfo.color)
+
+    if (dataManager.hover) {
+        const Dx = dataManager.hover.possition
+        drawLines(gl, lineShaderProgram, charData.verticalLine.bufferData, buildMatrix(dimensions, {
+            ...defaultParams,
+            Dx
+        }))
+        for (let chartName in charData.circles) {
+            let circlesBuffers = charData.circles[chartName]
+            let yPos = dataManager.hover.YPossitions[chartName]
+            for (let bufferInfo of circlesBuffers) {
+                drawCircles(gl, circleShaderProgram, bufferInfo.buffer, buildMatrix(dimensions, {
+                    ...defaultParams,
+                    Dx,
+                    Dy: yPos
+                }), bufferInfo.color)
+            }
+
+        }
     }
+
+
     requestAnimationFrame(drawScene)
 }
 

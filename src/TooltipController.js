@@ -33,15 +33,17 @@ export class Toooltipcontroller {
         this.tooltipContainer.style.display = "block"
         this.tooltipContainer.style.top = `${e.pageY - 100}px`
         this.tooltipContainer.style.left = `${e.pageX + 20}px`
-        const data = this.dataManager.getChartPossitonData(e.offsetX / 750)
+        this.dataManager.getChartPossitonData(e.offsetX / 750)
+        const data = this.dataManager.hover
         const dateString = getDateString(data.xPosition)
         this.dataContainer.innerText = dateString
-        for (let yInfo of data.YPossitions) {
-            this.chartsContainer[yInfo.name].innerText = `${yInfo.name}: ${yInfo.value}`
+        for (let yName in data.YPossitions) {
+            this.chartsContainer[yName].innerText = `${yName}: ${data.YPossitions[yName]}`
         }
     }
 
     hideTooltip (e) {
         this.tooltipContainer.style.display = "none"
+        this.dataManager.hover = null
     }
 }

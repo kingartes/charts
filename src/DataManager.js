@@ -1,7 +1,7 @@
 import DataSet from './Data'
 import {convertDataToPos} from "./render";
 import AnimationController from "./AnimationController";
-import {convertRgbToString} from "./utils";
+import {convertRgbToArray} from "./utils";
 import SliderController from "./SliderController";
 import {setupBuffers, setupTextBuffers} from "./GlUtils";
 import {makeTextTextures} from "./TextTextures";
@@ -81,7 +81,7 @@ class DataManager  {
         const colorsArray = new Array(chartVertices.length * 3)
         const colors = Object.values(this.chosenDataSet.colors)
 
-        const color = convertRgbToString(colors[chartIdx])
+        const color = convertRgbToArray(colors[chartIdx])
         for ( let ii = 0; ii < chartVertices.length; ii++) {
             let posX = chartVertices[ii][0]
             let posY = chartVertices[ii][1]
@@ -123,6 +123,29 @@ class DataManager  {
             bufferData,
             lines,
             labels
+        }
+    }
+
+    buildVerticalLine () {
+        const lines = new Array(6)
+        const colors = new Array(6)
+        lines[0] = this.minX
+        lines[1] = 0
+        lines[2] = 1
+        lines[3] = this.minX
+        lines[4] = this.maxY
+        lines[5] = 1
+        colors[0] = 100
+        colors[1] = 100
+        colors[2] = 100
+        colors[3] = 100
+        colors[4] = 100
+        colors[5] = 100
+        const bufferData = setupBuffers(this.gl, lines, colors)
+
+        return {
+            bufferData,
+            lines
         }
     }
 
@@ -172,19 +195,27 @@ class DataManager  {
     }
 
     buildCircles() {
-        let vertices = [[], []]
-        const deltaX = this.maxX - this.minX
-        for (let ii = 0; ii <= 360; ii++) {
-            const rad = ii * Math.PI / 180
-            vertices[0] = vertices[0].concat([this.minX + Math.sin(rad) * deltaX / 4, Math.cos(rad) * this.maxY / 4, 1])
-            vertices[0] = vertices[0].concat([this.minX + Math.sin(rad) * deltaX / 4 * 0.95, Math.cos(rad) * this.maxY / 4  * 0.95, 1])
-            vertices[1] = vertices[1].concat([this.minX + Math.sin(rad)* 0.95, Math.cos(rad) * 0.95, 1])
-            vertices[1] = vertices[1].concat([this.minX + deltaX / 2 , this.maxY / 2, 1])
+        const circles = {}
+        for (let chartIndex in this.chosenDataSet.names){
+            let chartName = this.chosenDataSet.names[chartIndex]
+            let charColor = convertRgbToArray(this.chosenDataSet.colors[chartIndex]).map(c => c / 255)
+            let vertices = [[], []]
+            const deltaX = this.maxX - this.minX
+            let x = - deltaX / 2
+            let y = - this.maxY / 2
+            for (let ii = 0; ii <= 360; ii++) {
+                const rad = ii * Math.PI / 180
+                vertices[0] = vertices[0].concat([this.minX + deltaX / 2 + Math.sin(rad)*deltaX / 2 * 0.025 + x, this.maxY /2 + Math.cos(rad) * this.maxY/2 * 0.025 + y, 1])
+                vertices[0] = vertices[0].concat([this.minX + deltaX / 2 + Math.sin(rad)*deltaX / 2 * 0.02 + x, this.maxY /2 + Math.cos(rad) * this.maxY/2 * 0.02 + y , 1])
+                vertices[1] = vertices[1].concat([this.minX + deltaX / 2 + Math.sin(rad)*deltaX / 2 * 0.02 + x, this.maxY /2 + Math.cos(rad) * this.maxY/2 * 0.02 + y, 1])
+                vertices[1] = vertices[1].concat([this.minX + deltaX / 2 + x, this.maxY / 2 + y, 1])
+            }
+            circles[chartName] = [
+                { buffer: setupBuffers(this.gl, vertices[0], []), color: [...charColor, 1] },
+                { buffer: setupBuffers(this.gl, vertices[1], []), color: [255, 255, 255, 1] }
+            ]
         }
-        return [
-            // { buffer: setupBuffers(this.gl, vertices[0], []), color: [0, 255, 0, 1] },
-            { buffer: setupBuffers(this.gl, vertices[1], []), color: [0, 255, 0, 1] }
-        ]
+        return circles
     }
 
     findYpossition (position, x) {
@@ -196,14 +227,11 @@ class DataManager  {
         if (rightPositionDiff < leftPositionDiff) {
             index = approximateIndex + 1
         }
-        const yPossitions = []
+        const yPossitions = {}
         const names = Object.values(this.chosenDataSet.names)
         for ( let ii= 1; ii <= names.length; ii ++) {
             const values = this.chosenDataSet.columns[ii].slice(1, this.chosenDataSet.columns[ii].length)
-            yPossitions[ii-1] = {
-                value: values[index],
-                name: names[ii-1]
-            }
+            yPossitions[names[ii-1]] = values[index]
         }
         return yPossitions
     }
@@ -211,9 +239,10 @@ class DataManager  {
     getChartPossitonData (possition) {
         const xPosition = this.minX + possition * (this.maxX - this.minX)
         const YPossitions = this.findYpossition(possition, xPosition)
-        return {
+        this.hover = {
             xPosition,
-            YPossitions
+            YPossitions,
+            possition
         }
     }
 
@@ -259,7 +288,7 @@ class DataManager  {
             chartVerticesGl2[chartIdx] = setupBuffers(this.gl2, verticesGraph, colorsArray)
         }
         const lines = this.buildLines()
-        const circlesBuffers = this.buildCircles()
+        const circles = this.buildCircles()
 
         // console.log(maxY, 'datachart')
         AnimationController.AddAnimation('MaxY', this.maxY, this.maxY, 2*this.maxY)
@@ -282,10 +311,11 @@ class DataManager  {
             chartVerticesGl,
             chartVerticesGl2,
             lines,
-            circlesBuffers,
+            circles,
             minX: this.minX,
             maxX: this.maxX,
             maxY: this.maxY,
+            verticalLine: this.buildVerticalLine(),
             letterInfo: this.buildLetterBuffer(lines)
         }
     }
