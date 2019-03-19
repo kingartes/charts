@@ -54,8 +54,13 @@ class SliderController {
 
         } if (this.sliderScaleRight) {
             let newWidth = this.width + deltaX
+            if (newWidth > this.originalWidth - 6) {
+                newWidth = this.originalWidth - 6
+            }
             this.slider.style.width = `${newWidth}px`
+
             this.onScale && this.onScale(newWidth, 0)
+
         } else if (this.sliderDrag) {
             let newPos = this.positionLeft + deltaX
             if (newPos < 0) {
@@ -70,11 +75,11 @@ class SliderController {
     }
 
     transformMoveToPercent (value) {
-        return value / this.originalWidth
+        return value / ( this.originalWidth - 6 )
     }
 
     transformScaleToValue (value) {
-        return value / this.originalWidth
+        return value / ( this.originalWidth - 6 )
     }
 
     onMove(handler) {

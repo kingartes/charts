@@ -1,6 +1,9 @@
+import {getDateString} from "./DatesController";
+
 export class Toooltipcontroller {
-    constructor(chartsInfo = [1, 1, 1, 1]) {
-        this.chartsInfo = chartsInfo
+    constructor(dataManager) {
+        this.chartsInfo = dataManager.chosenDataSet.names
+        this.dataManager = dataManager
         this.createTooltip()
     }
 
@@ -17,10 +20,10 @@ export class Toooltipcontroller {
         this.dataContainer = document.createElement('div')
         this.tooltipContainer.appendChild(this.dataContainer)
         this.chartsContainer = []
-        for (let chartInfo in this.chartsInfo) {
+        for (let chartIndex in this.chartsInfo) {
             let chartContainer = document.createElement('div')
-            // chartContainer.style.color = chartInfo.color
-            this.chartsContainer[chartInfo.name] = chartContainer
+            chartContainer.style.color = this.dataManager.chosenDataSet.colors[chartIndex]
+            this.chartsContainer[this.chartsInfo[chartIndex]] = chartContainer
             this.tooltipContainer.appendChild(chartContainer)
         }
         document.getElementById('app').appendChild(this.tooltipContainer)
@@ -30,6 +33,12 @@ export class Toooltipcontroller {
         this.tooltipContainer.style.display = "block"
         this.tooltipContainer.style.top = `${e.pageY - 100}px`
         this.tooltipContainer.style.left = `${e.pageX + 20}px`
+        const data = this.dataManager.getChartPossitonData(e.offsetX / 750)
+        const dateString = getDateString(data.xPosition)
+        this.dataContainer.innerText = dateString
+        for (let yInfo of data.YPossitions) {
+            this.chartsContainer[yInfo.name].innerText = `${yInfo.name}: ${yInfo.value}`
+        }
     }
 
     hideTooltip (e) {

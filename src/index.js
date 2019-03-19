@@ -25,7 +25,7 @@ function init() {
     dataManager.setShaderProgram('gl2LineShaderProgram', compileLineShaderProgram(gl))
     dataManager.setShaderProgram('glTextShaderProgram', compileTextShaderProgram(gl))
     dataManager.setShaderProgram('glCircleShaderProgram', compileCircleShaderProgram(gl))
-    const tooltipController = new Toooltipcontroller()
+    const tooltipController = new Toooltipcontroller(dataManager)
     canvas.addEventListener('mousemove', (e) => tooltipController.displayTooltip(e))
     canvas.addEventListener('mouseleave', () => tooltipController.hideTooltip())
     renderControllButtons(dataManager)
