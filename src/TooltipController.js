@@ -38,7 +38,12 @@ export class Toooltipcontroller {
         const dateString = getDateString(data.xPosition)
         this.dataContainer.innerText = dateString
         for (let yName in data.YPossitions) {
-            this.chartsContainer[yName].innerText = `${yName}: ${data.YPossitions[yName]}`
+            const chartKey = data.chartKeys[yName]
+            if(!this.dataManager.isIndexDisabled(chartKey)){
+                this.chartsContainer[yName].innerText = `${yName}: ${data.YPossitions[yName]}`
+            } else {
+                this.chartsContainer[yName].innerText = ''
+            }
         }
     }
 

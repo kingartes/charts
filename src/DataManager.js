@@ -53,6 +53,7 @@ class DataManager  {
 
 
     isIndexDisabled (name) {
+        console.log(disabledChartsIndexes)
        return disabledChartsIndexes[name]
     }
 
@@ -268,12 +269,15 @@ class DataManager  {
         }
         const YPossitions = {}
         const names = Object.values(this.chosenDataSet.names)
+        const chartKeys = Object.keys(this.chosenDataSet.names)
         for ( let ii= 1; ii <= names.length; ii ++) {
             const values = this.chosenDataSet.columns[ii].slice(range.start, range.end)
             YPossitions[names[ii-1]] = values[index]
+            chartKeys[names[ii-1]] = chartKeys[ii-1]
         }
         return {
             YPossitions,
+            chartKeys,
             xPosition: xPossitions[index]
         }
     }
@@ -284,11 +288,12 @@ class DataManager  {
 
     getChartPossitonData (possition) {
         const range = this._getXRange()
-        const { YPossitions, xPosition} = this.findYpossition(possition, this.findActualXPossition(possition, range), range)
+        const { YPossitions, xPosition, chartKeys} = this.findYpossition(possition, this.findActualXPossition(possition, range), range)
         this.hover = {
             xPosition,
             YPossitions,
-            possition
+            possition,
+            chartKeys
         }
         return this.hover
     }
