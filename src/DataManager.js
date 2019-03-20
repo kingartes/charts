@@ -19,6 +19,8 @@ class DataManager  {
         this.dataSet = DataSet
         this.chosenDataSetIndex = 5
         this.shaderPrograms = []
+        this.scaleX = 1
+        this.dx = 0
         this.gl = gl
         this.gl2 = gl2
         this.ctx = ctx
@@ -277,7 +279,6 @@ class DataManager  {
     }
 
     findActualXPossition (possition, range) {
-        console.log(range)
         return Math.floor(range.maxX + possition * (range.maxX - range.minX))
     }
 
@@ -300,7 +301,6 @@ class DataManager  {
         const chartVertices = new Array(names.length)
         const chartVerticesGl = new Array(names.length)
         const chartVerticesGl2 = new Array(names.length)
-        const colors = new Array(names.length)
 
         for ( let ii = 0; ii < names.length; ii++) {
             if (this.isIndexDisabled(names[ii])) {
@@ -334,7 +334,6 @@ class DataManager  {
             chartVerticesGl[chartIdx] = setupBuffers(this.gl, verticesGraph, colorsArray)
             chartVerticesGl2[chartIdx] = setupBuffers(this.gl2, verticesGraph, colorsArray)
         }
-        console.log(this.minX , this.maxX, this.maxY)
         const lines = this.buildLines()
         const circles = this.buildCircles()
 
@@ -343,11 +342,11 @@ class DataManager  {
         AnimationController.AddAnimation('ScaleX', 1, 1, 1)
         AnimationController.AddAnimation('Pivot', 0, 0, 0)
         AnimationController.AddAnimation('Dx', 0, 0, 0)
-        this.scaleX = 1
-        this.dx = 0
+
 
         SliderController.onScale( (scale, dx) => {
-            this.scaleX =  scale
+            console.log(scale)
+            this.scaleX =  isFinite(scale) ? scale : 1
             AnimationController.AddAnimation('ScaleX', 1/scale, 1, 1)
             this.drawDates()
             if (dx !== undefined) {
@@ -355,7 +354,7 @@ class DataManager  {
             }
         })
         SliderController.onMove( (move) => {
-            this.dx = -move
+            this.dx = isFinite(move) ? -move : 0
             AnimationController.AddAnimation('Dx', move, move, 0)
             this.drawDates()
         })

@@ -14,7 +14,7 @@ class SliderController {
     }
 
     getMaxRange () {
-        return parseInt(this.sliderContainer.style.width) - parseInt(this.slider.style.width)
+        return parseInt(this.sliderContainer.style.width) - parseInt(this.slider.style.width )  - 6
     }
 
     mouseDown (e) {
@@ -44,8 +44,8 @@ class SliderController {
             let newWidth = this.width - deltaX
             let newPos = this.positionLeft + deltaX
             this.slider.style.width = `${newWidth}px`
-            if (newPos < 0) {
-                newPos = 0
+            if (newPos < 1) {
+                newPos = 1
             }
             if (newPos > this.getMaxRange()) {
                 newPos = this.getMaxRange()
