@@ -24,7 +24,7 @@ class SliderController {
         if (e.offsetX < 0) {
             this.sliderScaleLeft  = true
         }
-        if (e.offsetX > 742) {
+        if (e.offsetX > this.width - 6) {
             this.sliderScaleRight = true
         } else  {
             this.sliderDrag = true
@@ -39,6 +39,7 @@ class SliderController {
 
     mouseMove (e) {
         let deltaX =  e.x - this.x
+
         if (this.sliderScaleLeft) {
             let newWidth = this.width - deltaX
             let newPos = this.positionLeft + deltaX

@@ -5,13 +5,14 @@ import {convertRgbToArray} from "./utils";
 import SliderController from "./SliderController";
 import {setupBuffers, setupTextBuffers} from "./GlUtils";
 import {makeTextTextures} from "./TextTextures";
+import {getDateString} from "./DatesController";
 
 const disabledChartsIndexes = {}
 
 let instance = null
 
 class DataManager  {
-    constructor (gl, gl2) {
+    constructor (gl, gl2, ctx) {
         if (instance) {
             return instance
         }
@@ -20,6 +21,7 @@ class DataManager  {
         this.shaderPrograms = []
         this.gl = gl
         this.gl2 = gl2
+        this.ctx = ctx
         this.chosenDataSet = this.dataSet[this.chosenDataSetIndex]
         this.charTextures = makeTextTextures(this.gl)
         this.setupChartsDisabledOptions()
@@ -75,6 +77,27 @@ class DataManager  {
         ]
     }
 
+    drawDates () {
+        const width = 750
+        const height = 30
+        this.ctx.width  = width + 10;
+        this.ctx.height = height;
+        this.ctx.font = "16px monospace";
+        this.ctx.textAlign = "left";
+        this.ctx.textBaseline = "middle";
+        this.ctx.fillStyle = "black";
+        this.ctx.clearRect(0, 0,  this.ctx.canvas.width,  this.ctx.canvas.height);
+        for (let ii=0; ii < 6; ii++) {
+            let datesPossitions = ii / 6 + 0.0001
+            this.getChartPossitonData(datesPossitions)
+            let date = getDateString(this.hover.xPosition)
+            this.ctx.fillText(date, datesPossitions * width, height / 2);
+        }
+        let datesPossitions = 0.9999999999
+        let data = this.getChartPossitonData(datesPossitions)
+        let date = getDateString(data.xPosition)
+        this.ctx.fillText(date, datesPossitions * width, height / 2);
+    }
 
     getChartVertices(chartVertices, chartIdx) {
         const verticesGraph = new Array(chartVertices.length * 3)
@@ -218,8 +241,22 @@ class DataManager  {
         return circles
     }
 
-    findYpossition (position, x) {
-        const xPossitions = this.chosenDataSet.columns[0].slice(1, this.chosenDataSet.columns[0].length)
+    _getXRange () {
+        let start = 1
+        let end = this.chosenDataSet.columns[0].length - 1
+        let diff = (end - start)
+        start = Math.floor(start + this.dx*diff)
+        end = Math.ceil(start + this.scaleX*diff)
+        return {
+            start,
+            end,
+            minX: this.chosenDataSet.columns[0][start],
+            maxX: this.chosenDataSet.columns[0][end]
+        }
+    }
+
+    findYpossition (position, x, range) {
+        const xPossitions = this.chosenDataSet.columns[0].slice(range.start, range.end)
         const approximateIndex = Math.floor(position * xPossitions.length)
         const leftPositionDiff = Math.abs(xPossitions[approximateIndex] - x)
         const rightPositionDiff = Math.abs(xPossitions[approximateIndex + 1] -x)
@@ -227,23 +264,32 @@ class DataManager  {
         if (rightPositionDiff < leftPositionDiff) {
             index = approximateIndex + 1
         }
-        const yPossitions = {}
+        const YPossitions = {}
         const names = Object.values(this.chosenDataSet.names)
         for ( let ii= 1; ii <= names.length; ii ++) {
-            const values = this.chosenDataSet.columns[ii].slice(1, this.chosenDataSet.columns[ii].length)
-            yPossitions[names[ii-1]] = values[index]
+            const values = this.chosenDataSet.columns[ii].slice(range.start, range.end)
+            YPossitions[names[ii-1]] = values[index]
         }
-        return yPossitions
+        return {
+            YPossitions,
+            xPosition: xPossitions[index]
+        }
+    }
+
+    findActualXPossition (possition, range) {
+        console.log(range)
+        return Math.floor(range.maxX + possition * (range.maxX - range.minX))
     }
 
     getChartPossitonData (possition) {
-        const xPosition = this.minX + possition * (this.maxX - this.minX)
-        const YPossitions = this.findYpossition(possition, xPosition)
+        const range = this._getXRange()
+        const { YPossitions, xPosition} = this.findYpossition(possition, this.findActualXPossition(possition, range), range)
         this.hover = {
             xPosition,
             YPossitions,
             possition
         }
+        return this.hover
     }
 
     setChartData () {
@@ -267,7 +313,8 @@ class DataManager  {
 
         this.minX = xPositions[0]
         this.maxX = xPositions[xPositions.length-1]
-        this.maxY = 0
+        //this.maxY = 0
+        let maxY = 0
 
         for (let ii = 0; ii < xPositions.length; ii++) {
             let tmpMax = 0
@@ -277,36 +324,43 @@ class DataManager  {
                     tmpMax = yPositions[setIdx][ii]
                 }
             }
-            if (tmpMax > this.maxY) {
-                this.maxY =tmpMax
+            if (tmpMax > maxY) {
+                maxY = tmpMax
             }
         }
-
+        this.maxY = maxY || this.maxY
         for (let chartIdx in chartVertices) {
             const { verticesGraph, colorsArray} = this.getChartVertices(chartVertices[chartIdx], chartIdx)
             chartVerticesGl[chartIdx] = setupBuffers(this.gl, verticesGraph, colorsArray)
             chartVerticesGl2[chartIdx] = setupBuffers(this.gl2, verticesGraph, colorsArray)
         }
+        console.log(this.minX , this.maxX, this.maxY)
         const lines = this.buildLines()
         const circles = this.buildCircles()
 
         // console.log(maxY, 'datachart')
-        AnimationController.AddAnimation('MaxY', this.maxY, this.maxY, 2*this.maxY)
+        AnimationController.AddAnimation('MaxY', this.maxY, this.maxY)
         AnimationController.AddAnimation('ScaleX', 1, 1, 1)
         AnimationController.AddAnimation('Pivot', 0, 0, 0)
         AnimationController.AddAnimation('Dx', 0, 0, 0)
+        this.scaleX = 1
+        this.dx = 0
+
         SliderController.onScale( (scale, dx) => {
+            this.scaleX =  scale
             AnimationController.AddAnimation('ScaleX', 1/scale, 1, 1)
+            this.drawDates()
             if (dx !== undefined) {
                 AnimationController.AddAnimation('Pivot', dx, dx, 0, 10)
             }
         })
         SliderController.onMove( (move) => {
+            this.dx = -move
             AnimationController.AddAnimation('Dx', move, move, 0)
+            this.drawDates()
         })
 
-
-
+        this.drawDates()
         this.dataToDraw = {
             chartVerticesGl,
             chartVerticesGl2,
