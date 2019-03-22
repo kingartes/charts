@@ -1,11 +1,11 @@
 import DataSet from './Data'
-import {convertDataToPos} from "./render";
 import AnimationController from "./AnimationController";
 import {convertRgbToArray} from "./utils";
 import SliderController from "./SliderController";
 import {setupBuffers, setupTextBuffers} from "./GlUtils";
 import {makeTextTextures} from "./TextTextures";
 import {getDateString} from "./DatesController";
+import ThemeController from './ThemeController';
 
 const disabledChartsIndexes = {}
 
@@ -53,7 +53,6 @@ class DataManager  {
 
 
     isIndexDisabled (name) {
-        console.log(disabledChartsIndexes)
        return disabledChartsIndexes[name]
     }
 
@@ -238,7 +237,7 @@ class DataManager  {
             }
             circles[chartName] = [
                 { buffer: setupBuffers(this.gl, vertices[0], []), color: [...charColor, 1] },
-                { buffer: setupBuffers(this.gl, vertices[1], []), color: [255, 255, 255, 1] }
+                { buffer: setupBuffers(this.gl, vertices[1], []), color: 'variable' }
             ]
         }
         return circles
@@ -296,7 +295,7 @@ class DataManager  {
             chartKeys
         }
         return this.hover
-    }
+    }   
 
     setChartData () {
         const data = this.chosenDataSet
@@ -318,7 +317,7 @@ class DataManager  {
 
         this.minX = xPositions[0]
         this.maxX = xPositions[xPositions.length-1]
-        //this.maxY = 0
+
         let maxY = 0
 
         for (let ii = 0; ii < xPositions.length; ii++) {
@@ -342,7 +341,7 @@ class DataManager  {
         const lines = this.buildLines()
         const circles = this.buildCircles()
 
-        // console.log(maxY, 'datachart')
+
         AnimationController.AddAnimation('MaxY', this.maxY, this.maxY)
         AnimationController.AddAnimation('ScaleX', 1, 1, 1)
         AnimationController.AddAnimation('Pivot', 0, 0, 0)
@@ -350,7 +349,6 @@ class DataManager  {
 
 
         SliderController.onScale( (scale, dx) => {
-            console.log(scale)
             this.scaleX =  isFinite(scale) ? scale : 1
             AnimationController.AddAnimation('ScaleX', 1/scale, 1, 1)
             this.drawDates()

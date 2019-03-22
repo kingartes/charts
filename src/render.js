@@ -3,6 +3,7 @@ import DataManager from "./DataManager";
 import {Matrix} from "./Matrix";
 import AnimationController from "./AnimationController";
 import {compileProgramm} from "./GlUtils";
+import ThemeController from "./ThemeController";
 
 const vertCode =
     'attribute vec4 a_color;' +
@@ -211,13 +212,14 @@ export function buildMatrix (dimensions, params) {
 }
 
 export function clearGl (gl) {
-    gl.clearColor(1, 1, 1, 1);
+    const color = convertRgbToArray(ThemeController.colorSettings.backgoundColor)
+    gl.clearColor(color[0] / 255, color[1]/255, color[2]/255, 1)
 
-    gl.enable(gl.CULL_FACE);
-    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE)
+    gl.enable(gl.DEPTH_TEST)
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0,0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.viewport(0,0, gl.canvas.clientWidth, gl.canvas.clientHeight)
 }
 
 export function drawScene (clock) {
@@ -265,11 +267,15 @@ export function drawScene (clock) {
             let circlesBuffers = charData.circles[chartName]
             let yPos = dataManager.hover.YPossitions[chartName]
             for (let bufferInfo of circlesBuffers) {
+                let color = bufferInfo.color
+                if (color === 'variable') {
+                    color = [...convertRgbToArray(ThemeController.colorSettings.backgoundColor).map(c => c / 255), 1]
+                }
                 drawCircles(gl, circleShaderProgram, bufferInfo.buffer, buildMatrix(dimensions, {
                     ...defaultParams,
                     Dx,
                     Dy: yPos
-                }), bufferInfo.color)
+                }), color)
             }
 
         }

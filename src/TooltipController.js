@@ -1,4 +1,5 @@
 import {getDateString} from "./DatesController";
+import ThemeController from "./ThemeController";
 
 export class Toooltipcontroller {
     constructor(dataManager) {
@@ -15,8 +16,6 @@ export class Toooltipcontroller {
         this.tooltipContainer.style.width = "100px"
         this.tooltipContainer.style.height = "100px"
         this.tooltipContainer.style.borderRadius = "10px"
-        this.tooltipContainer.style.backgroundColor = "white"
-        this.tooltipContainer.style.boxShadow = "1px 4px 0px rgb(190, 190, 190)"
         this.dataContainer = document.createElement('div')
         this.tooltipContainer.appendChild(this.dataContainer)
         this.chartsContainer = []
@@ -31,6 +30,9 @@ export class Toooltipcontroller {
 
     displayTooltip (e) {
         this.tooltipContainer.style.display = "block"
+        this.tooltipContainer.style.backgroundColor = ThemeController.colorSettings.backgoundColor
+        this.tooltipContainer.style.boxShadow = ThemeController.colorSettings.tooltip.boxShadow
+        this.tooltipContainer.style.color = ThemeController.colorSettings.tooltip.color
         this.tooltipContainer.style.top = `${e.pageY - 100}px`
         this.tooltipContainer.style.left = `${e.pageX + 20}px`
         this.dataManager.getChartPossitonData(e.offsetX / 750)
