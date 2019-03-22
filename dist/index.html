@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>WebGL Demo</title>
+    <title>Chart contest: WebgGL charts</title>
     <style>
       #textcanvas {
         position: absolute;
@@ -13,12 +13,22 @@
       #app {
         width: 750px;
         margin: 0 auto;
+        --slider-background:rgba(10, 60, 100, 0.1);
+        --slider-border: rgba(0, 60, 100, 0.3);
+        --tooltip-color: black;
       }
-      #slider-background {
-        width: 750px;
+      #slider-background-left{
+        width: 0px;
         position: absolute;
         height: 100px;
-        background-color: rgba(10, 60, 100, 0.1);
+        background-color: var(--slider-background);
+      }
+      #slider-background-right{
+        width: 0px;
+        right: 0px;
+        position: absolute;
+        height: 100px;
+        background-color: var(--slider-background);
       }
       #slider {
         left: 0px;
@@ -26,7 +36,7 @@
         height: 97px;
         z-index: 0;
         border: 1.5px black solid;
-        border-color: rgba(0, 60, 100, 0.3);
+        border-color:var(--slider-border);
         border-left-width: 4px;
         border-right-width: 4px;
         box-sizing: content-box;
@@ -55,10 +65,11 @@
         font-size: 22px;
         width: 50px;
         user-select: none;
-        border: 1px solid black;
+        border: 1px solid rgba(80, 80, 80, 0.9);
         margin: 0 10px;
         text-align:right;
         background-color: var(--background-color);
+        color: var(--tooltip-color);
       }
       #controlButtons input{
         position: absolute;
@@ -111,8 +122,9 @@
     <div id="app">
       <canvas id="glcanvas" width="750" height="700"></canvas>
       <div id="slider-container" style="width: 750px; position: absolute; height: 100px; top: 744px;">
-        <div id="slider-background"></div>
+        <div id="slider-background-left"></div>
         <div id="slider" style="width:744px; left: 0px;"></div>
+        <div id="slider-background-right"></div>
       </div>
       <canvas id="dateCanvas" width="800" height="30"></canvas>
       <canvas id="glcanvas1" width="750" height="100"></canvas>
@@ -122,6 +134,5 @@
       </div>
     </div>
     <script src="main.js"></script>
-    <img src="JS_Chart_Night.png"/>
   </body>
 </html>

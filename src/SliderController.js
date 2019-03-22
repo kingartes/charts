@@ -6,7 +6,8 @@ class SliderController {
 
         this.slider = document.getElementById("slider")
         this.sliderContainer = document.getElementById("slider-container")
-        this.sliderBackground = document.getElementById("slider-background")
+        this.sliderBackgroundLeft = document.getElementById("slider-background-left")
+        this.sliderBackgroundRight = document.getElementById("slider-background-right")
         this.slider.addEventListener("mousedown", e => this.mouseDown(e) )
         document.addEventListener("mouseup", e => this.mouseUp(e) )
         this.sliderContainer.addEventListener("mousemove", e => this.mouseMove(e) )
@@ -73,6 +74,9 @@ class SliderController {
             this.slider.style.left = `${newPos}px`
             this.onMove && this.onMove(-newPos)
         }
+        this.sliderBackgroundLeft.style.width = this.slider.style.left
+        this.sliderBackgroundRight.style.width = 
+            `${parseInt(this.sliderContainer.style.width) - parseInt(this.slider.style.width) - parseInt(this.slider.style.left)  - 6}px`
     }
 
     transformMoveToPercent (value) {

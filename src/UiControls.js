@@ -1,5 +1,3 @@
-import ThemeController from "./ThemeController";
-
 export function renderControllButtons (dataManager) {
     const buttonsParams = dataManager.getChartsColors()
     const buttonsContainer = document.getElementById('controlButtons')

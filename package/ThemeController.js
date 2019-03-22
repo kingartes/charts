@@ -1,4 +1,5 @@
-const DAY_THEME = 'DAY_THEME'
+const ThemeController = (function(){
+    const DAY_THEME = 'DAY_THEME'
 const NIGHT_THEME = 'NIGHT_THEME'
 
 const COLOR_SETTINGS = {
@@ -48,4 +49,5 @@ class ThemeController {
     }
 }
 
-export default new ThemeController()
+return new ThemeController()
+})()

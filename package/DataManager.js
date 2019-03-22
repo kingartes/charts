@@ -1,11 +1,5 @@
-import AnimationController from "./AnimationController";
-import {convertRgbToArray} from "./utils";
-import SliderController from "./SliderController";
-import {setupBuffers, setupTextBuffers} from "./GlUtils";
-import {makeTextTextures} from "./TextTextures";
-import {getDateString} from "./DatesController";
-
-const disabledChartsIndexes = {}
+const DataManager = (function(){
+    const disabledChartsIndexes = {}
 
 let instance = null
 
@@ -377,4 +371,5 @@ class DataManager  {
     }
 }
 
-export default DataManager
+return DataManager
+})();
